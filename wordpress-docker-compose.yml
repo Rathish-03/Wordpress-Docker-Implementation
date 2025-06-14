@@ -1,0 +1,38 @@
+# ~/wordpress_site1/docker-compose.yml
+version: '3.8'
+
+services:
+  db:
+    image: mariadb:10.6 # Or mysql:8.0 if you prefer MySQL
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - db_data:/var/lib/mysql # Persistent storage for database
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: your_root_password_here # CHANGE THIS to a strong password
+      MYSQL_DATABASE: wordpress_db # CHANGE THIS to your desired DB name
+      MYSQL_USER: wordpress_user # CHANGE THIS to your desired DB user
+      MYSQL_PASSWORD: your_db_password_here # CHANGE THIS to a strong password
+
+  wordpress:
+    depends_on:
+      - db
+    image: wordpress:latest # Uses the latest WordPress image with Apache or Nginx/PHP-FPM
+    ports:
+      - "80:80" # Map host port 80 to container port 80
+      # - "443:443" # Uncomment for HTTPS if you configure it inside the container or use a reverse proxy
+    volumes:
+      - wordpress_data:/var/www/html # Persistent storage for WordPress files
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: db:3306 # 'db' is the service name for the database container
+      WORDPRESS_DB_NAME: wordpress_db # Must match MYSQL_DATABASE from db service
+      WORDPRESS_DB_USER: wordpress_user # Must match MYSQL_USER from db service
+      WORDPRESS_DB_PASSWORD: your_db_password_here # Must match MYSQL_PASSWORD from db service
+      # Optional: set site URL directly
+      # WORDPRESS_URL: http://your-domain.com
+      # WORDPRESS_SITE_URL: http://your-domain.com
+
+volumes:
+  db_data: {}
+  wordpress_data: {}
